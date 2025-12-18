@@ -1,52 +1,61 @@
 <?php
 
-namespace App\Http\Controllers\Bff;
+namespace App\Http\Controllers\bff;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $rows = DB::table('CustomerTTH as tth')
+        $query = DB::table('CustomerTTH as tth')
             ->join('Customer as c', 'c.CustID', '=', 'tth.CustID')
             ->select(
-                'c.CustID as customer_id',
-                'c.Name as customer_name',
-                'c.Address as address',
-                'c.PhoneNo as phone',
-                'tth.TTOTTPNo as ttol_no',
+                'c.CustID as cust_id',
+                'c.Name as store_name',
+                'tth.TTOTTPNo as doc_no',
                 'tth.DocDate as doc_date',
-                'tth.Received as received'
+                'tth.Received',
+                'tth.ReceivedDate'
             )
-            ->orderBy('c.Name')
-            ->get();
+            ->orderBy('c.Name');
 
-        $data = $rows
-            ->groupBy('customer_id')
-            ->map(function ($items) {
-                $first = $items->first();
+        // 🔍 Filter Nama Toko
+        if ($request->filled('store_name')) {
+            $query->where('c.Name', 'like', '%'.$request->store_name.'%');
+        }
 
-                return [
-                    'customer_id' => $first->customer_id,
-                    'customer_name' => $first->customer_name,
-                    'address' => $first->address,
-                    'phone' => $first->phone,
-                    'status' => $items->every(fn ($i) => $i->received == 1)
-                        ? 'Sudah Diberikan'
-                        : 'Belum Diberikan',
-                    'vouchers' => $items->map(fn ($i) => [
-                        'ttol_no' => $i->ttol_no,
-                        'doc_date' => $i->doc_date,
-                        'received' => (bool) $i->received,
-                    ])->values(),
-                ];
-            })
-            ->values();
+        $rows = $query->get();
 
-        return response()->json([
-            'data' => $data,
-        ]);
+        $data = $rows->groupBy('cust_id')->map(function ($items) {
+            $first = $items->first();
+
+            return [
+                'cust_id' => $first->cust_id,
+                'store_name' => $first->store_name,
+                'status' => $this->status($items),
+                'documents' => $items->map(fn ($i) => [
+                    'doc_no' => $i->doc_no,
+                    'date' => $i->doc_date,
+                ])->values(),
+            ];
+        })->values();
+
+        return response()->json(['data' => $data]);
+    }
+
+    private function status($items)
+    {
+        if ($items->every(fn ($i) => $i->Received === 1)) {
+            return 'TERIMA';
+        }
+
+        if ($items->contains(fn ($i) => $i->Received === 0)) {
+            return 'TOLAK';
+        }
+
+        return 'BELUM';
     }
 }

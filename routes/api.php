@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\bff\HomeController;
+use App\Http\Controllers\bff\StoreConfirmController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerTTHController;
 use App\Http\Controllers\CustomerTTHDetailController;
@@ -40,4 +41,5 @@ Route::prefix('mobile-config')->group(function () {
 
 Route::prefix('bff')->group(function () {
     Route::get('/home', [HomeController::class, 'index']);
+    Route::post('/store/{custId}/confirm', [StoreConfirmController::class, 'confirm']);
 });
