@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Bff\HomeController;
+use App\Http\Controllers\bff\HomeController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerTTHController;
 use App\Http\Controllers\CustomerTTHDetailController;
