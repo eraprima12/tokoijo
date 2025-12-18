@@ -36,3 +36,5 @@ Route::prefix('mobile-config')->group(function () {
     Route::get('/by-name/{name}', [MobileConfigController::class, 'byName']);
 
 });
+
+Route::get('/get-home-data', [HomeController::class, 'index']);
