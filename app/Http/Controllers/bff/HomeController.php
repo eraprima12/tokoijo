@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Bff;
+namespace App\Http\Controllers\bff;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
